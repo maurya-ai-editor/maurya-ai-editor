@@ -1,0 +1,46 @@
+
+name: Maurya AI Editor APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'maurya_photo_editor_mvp.zip'
+      - '.github/workflows/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Flutter project
+        run: |
+          mkdir app
+          unzip maurya_photo_editor_mvp.zip -d app
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate Android files
+        working-directory: app/maurya_photo_editor
+        run: flutter create --platforms=android .
+
+      - name: Get dependencies
+        working-directory: app/maurya_photo_editor
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: app/maurya_photo_editor
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Maurya-AI-Editor-APK
+          path: app/maurya_photo_editor/build/app/outputs/flutter-apk/app-release.apk
+          
